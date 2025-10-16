@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'))
 app.use('/project_logos', express.static('project_logos'))
+app.use('task_attachments', express.static('task_attachments'))
 
 
 

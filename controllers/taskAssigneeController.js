@@ -1,50 +1,13 @@
 import db from "../db.js";
 
-// export const addProjectMember = (req, res) => {
-//   const { project_id, user_id, role = "Viewer" } = req.body;
 
-//   if (!project_id || !user_id) {
-//     return res.status(400).json({ message: "project_id and user_id are required" });
-//   }
-
-//   const validRoles = ["Owner", "Manager", "Editor", "Viewer"];
-//   if (!validRoles.includes(role)) {
-//     return res.status(400).json({ message: "Invalid role provided" });
-//   }
-
-//   const checkSql = `SELECT * FROM st_project_members WHERE project_id = ? AND user_id = ?`;
-//   db.query(checkSql, [project_id, user_id], (err, results) => {
-//     if (err) return res.status(500).json({ error: err.sqlMessage });
-
-//     if (results.length > 0) {
-//       return res.status(400).json({ message: "User is already a member of this project" });
-//     }
-
-//     const sql = `INSERT INTO st_project_members (project_id, user_id, role)
-//                  VALUES (?, ?, ?)`;
-//     db.query(sql, [project_id, user_id, role], (err, result) => {
-//       if (err) return res.status(500).json({ error: err.sqlMessage });
-
-//       res.status(201).json({
-//         message: "✅ Member added successfully",
-//         member_id: result.insertId,
-//       });
-//     });
-//   });
-// };
 export const addTaskAssignee = (req, res) => {
   const { task_id, user_id } = req.body;
 
   if (!task_id || !user_id) {
     return res.status(400).json({ message: "task_id and user_id are required" });
   }
-//   const checkSql = `SELECT * FROM st_task_assignees WHERE project_id = ? AND user_id = ?`;
-//   db.query(checkSql, [project_id, user_id], (err, results) => {
-//     if (err) return res.status(500).json({ error: err.sqlMessage });
 
-//     if (results.length > 0) {
-//       return res.status(400).json({ message: "User is already a member of this project" });
-//     }
   const sql = `INSERT INTO st_task_assignees (task_id, user_id) VALUES (?, ?)`;
 
   db.query(sql, [task_id, user_id], (err, result) => {

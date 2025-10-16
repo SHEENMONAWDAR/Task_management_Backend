@@ -10,7 +10,7 @@ import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.post("/assignee", verifyToken, isAdmin, addTaskAssignee);
+router.post("/", verifyToken, isAdmin, addTaskAssignee);
 
 router.get("/assignees/:taskId", verifyToken, isAdmin, getTaskAssignees);
 
