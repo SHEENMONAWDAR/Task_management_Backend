@@ -14,13 +14,13 @@ import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllTasks,verifyToken, isAdmin);
-router.get("/todo", getTasksByStatustodo,verifyToken, isAdmin);
-router.get("/inprogress", getTasksByStatusinprogress,verifyToken, isAdmin);
-router.get("/done", getTasksByStatusdone,verifyToken, isAdmin);
-router.get("/task/:id", getTaskById,verifyToken, isAdmin);
-router.post("/",upload.single("task_attachments"), createTask,verifyToken, isAdmin);
-router.put("/updatetask/:id",upload.single("task_attachments"), updateTask,verifyToken, isAdmin);
-router.delete("/tasks/:id", deleteTask,verifyToken, isAdmin);
+router.get("/", getAllTasks,verifyToken);
+router.get("/todo", getTasksByStatustodo,verifyToken);
+router.get("/inprogress", getTasksByStatusinprogress,verifyToken);
+router.get("/done", getTasksByStatusdone,verifyToken);
+router.get("/task/:id", getTaskById,verifyToken);
+router.post("/",upload.single("task_attachments"), createTask,verifyToken);
+router.put("/updatetask/:id",upload.single("task_attachments"), updateTask,verifyToken);
+router.delete("/tasks/:id", deleteTask,verifyToken);
 
 export default router;

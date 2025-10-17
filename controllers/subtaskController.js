@@ -3,7 +3,6 @@ import db from "../db.js";
 
 export const getSubtasks = (req, res) => {
   const { parent_task_id } = req.params;
-  console.log(parent_task_id)
   const sql = "SELECT * FROM st_tasks WHERE parent_task_id = ?";
 
   db.query(sql, [parent_task_id], (err, results) => {
@@ -24,7 +23,6 @@ export const createSubtask = (req, res) => {
       description,
       status = "todo",
       project_id,
-      assigned_to,
       created_by,
       due_date,
       parent_task_id,
@@ -38,13 +36,13 @@ export const createSubtask = (req, res) => {
 
     const sql = `
       INSERT INTO st_tasks 
-      (title, description, status, project_id, assigned_to, created_by, parent_task_id, due_date)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (title, description, status, project_id, created_by, parent_task_id, due_date)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(
       sql,
-      [title, description, status, project_id, assigned_to, created_by, parent_task_id, due_date],
+      [title, description, status, project_id, created_by, parent_task_id, due_date],
       (err, result) => {
         if (err) {
           console.error("❌ Error creating subtask:", err);
@@ -66,15 +64,15 @@ export const createSubtask = (req, res) => {
 
 export const updateSubtask = (req, res) => {
   const { id } = req.params;
-  const { title, description, status, assigned_to, due_date } = req.body;
+  const { title, description, status, due_date } = req.body;
 
   const sql = `
     UPDATE st_tasks
-    SET title = ?, description = ?, status = ?, assigned_to = ?, due_date = ?
+    SET title = ?, description = ?, status = ?, due_date = ?
     WHERE id = ? AND parent_task_id IS NOT NULL
   `;
 
-  db.query(sql, [title, description, status, assigned_to, due_date, id], (err, result) => {
+  db.query(sql, [title, description, status, due_date, id], (err, result) => {
     if (err) return res.status(500).json({ message: "Database error", error: err });
     if (result.affectedRows === 0)
       return res.status(404).json({ message: "Subtask not found" });
