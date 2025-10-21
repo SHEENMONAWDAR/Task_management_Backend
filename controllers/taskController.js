@@ -65,11 +65,21 @@ export const getAllTasks = async (req, res) => {
 SELECT 
   t.*, 
   p.name AS project_name, 
-  u.name AS assigned_user
+  COALESCE(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'image', u.image
+      )
+    ),
+    JSON_ARRAY()
+  ) AS users
 FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
-LEFT JOIN st_users u ON au.user_id = u.id;
+LEFT JOIN st_users u ON au.user_id = u.id
+GROUP BY t.id;
     `;
 
     const [results] = await db.promise().query(sql);
@@ -85,15 +95,27 @@ export const getTasksByStatustodo = async (req, res) => {
 SELECT 
   t.*, 
   p.progress AS project_progress,
-  p.name AS project_name, 
-  u.name AS assigned_user,
-  u.image AS assigned_user_image,
-  COUNT(t.id) OVER() AS total_tasks
+  p.name AS project_name,
+  p.progress AS task_progress,
+  t.Attachments AS task_attachments,
+  COALESCE(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'image', u.image
+      )
+    ),
+    JSON_ARRAY()
+  ) AS users,
+  COUNT(*) OVER() AS total_tasks
 FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
-where t.status = 'todo';
+WHERE t.status = 'todo'
+GROUP BY t.id;
+
     `;
 
     const [results] = await db.promise().query(sql);
@@ -110,14 +132,24 @@ SELECT
   t.*, 
   p.progress AS project_progress,
   p.name AS project_name, 
-  u.name AS assigned_user,
-  u.image AS assigned_user_image,
+    p.progress AS task_progress,
+    COALESCE(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'image', u.image
+      )
+    ),
+    JSON_ARRAY()
+  ) AS users,
   COUNT(t.id) OVER() AS total_tasks
 FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
-where t.status = 'in-progress';
+where t.status = 'in-progress'
+GROUP BY t.id;
     `;
 
     const [results] = await db.promise().query(sql);
@@ -134,14 +166,24 @@ SELECT
   t.*, 
   p.progress AS project_progress,
   p.name AS project_name, 
-  u.name AS assigned_user,
-  u.image AS assigned_user_image,
+  p.progress AS task_progress,
+  COALESCE(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'image', u.image
+      )
+    ),
+    JSON_ARRAY()
+  ) AS users,
   COUNT(t.id) OVER() AS total_tasks
 FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
-where t.status = 'done';
+where t.status = 'done'
+GROUP BY t.id;
     `;
 
     const [results] = await db.promise().query(sql);
