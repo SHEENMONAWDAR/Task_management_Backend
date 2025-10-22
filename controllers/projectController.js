@@ -25,7 +25,7 @@ export const upload = multer({ storage });
 // --- Controller Functions ---
 
 export const getProjectsWithDetails = (req, res) => {
-const sql = `
+  const sql = `
 SELECT
   p.id AS project_id,
   p.name AS project_name,
@@ -66,13 +66,48 @@ GROUP BY p.id;
 
 
 
-export const getAllProjects = (req, res) => {
-  const sql = "SELECT * FROM st_projects";
-  db.query(sql, (err, results) => {
+export const getAllProjectswithuserId = (req, res) => {
+  const {userId} = req.params
+  const sql = `
+  SELECT
+  p.id AS project_id,
+  p.name AS project_name,
+  p.status AS project_status,
+  p.description AS project_description,
+  p.progress AS project_progress,
+  p.due_date AS project_due_date,
+  p.start_date AS project_start_date,
+  p.priority AS project_priority,
+  p.budget AS project_budget,
+  p.owner_name AS project_owner_name,
+  (SELECT COUNT(*) FROM st_tasks WHERE project_id = p.id) AS total_tasks,
+  COALESCE(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'image', u.image
+      )
+    ),
+    JSON_ARRAY()
+  ) AS users
+FROM st_projects p
+LEFT JOIN st_project_members pm ON pm.project_id = p.id
+LEFT JOIN st_users u ON u.id = pm.user_id
+WHERE p.id IN (
+    SELECT project_id 
+    FROM st_project_members 
+    WHERE user_id = ?
+)
+GROUP BY p.id;
+  `;
+  db.query(sql,[userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
 };
+
+
 
 export const createProject = (req, res) => {
   try {

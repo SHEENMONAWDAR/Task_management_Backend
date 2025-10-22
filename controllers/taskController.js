@@ -285,7 +285,6 @@ export const updateTask = async (req, res) => {
       Project_types,
       status,
       project_id,
-      assigned_to,
       parent_task_id,
       due_date,
     } = req.body;
@@ -299,8 +298,7 @@ export const updateTask = async (req, res) => {
         description = ?, 
         Project_types = ?, 
         Attachments = ?, 
-        status = ?, 
-        assigned_to = ?, 
+        status = ?,  
         parent_task_id = ?, 
         due_date = ?, 
         project_id = ?
@@ -313,7 +311,6 @@ export const updateTask = async (req, res) => {
       Project_types || null,
       Attachments || null,
       status || null,
-      assigned_to || null,
       parent_task_id || null,
       due_date || null,
       project_id || null,
@@ -385,3 +382,36 @@ export const deleteTask = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+export const getTaskStatus = (req, res) => {
+  const { userId } = req.params
+  try {
+    const sql = `
+SELECT
+    t.id,
+    t.title,
+    u.name,
+    t.status,
+    COUNT(*) OVER() AS total_tasks_for_user,
+    COUNT(CASE WHEN t.status = 'in-progress' THEN 1 END) OVER() * 100.0 / COUNT(*) OVER() AS inprogress_percentage,
+    COUNT(CASE WHEN t.status = 'done' THEN 1 END) OVER() * 100.0 / COUNT(*) OVER() AS completed_percentage,
+    COUNT(CASE WHEN t.status NOT IN ('in-progress','done') THEN 1 END) OVER() * 100.0 / COUNT(*) OVER() AS others_percentage
+FROM st_tasks t
+LEFT JOIN st_task_assignees au ON t.id = au.task_id
+LEFT JOIN st_users u ON u.id = au.user_id
+WHERE u.id = ?;
+  `;
+
+    db.query(sql, [userId], (err, results) => {
+      if (err) {
+        console.error("❌ Error fetching assignees:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      res.status(200).json(results);
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}

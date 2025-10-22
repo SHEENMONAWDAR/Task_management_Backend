@@ -8,7 +8,8 @@ import taskRoutes from "./routes/taskRoutes.js";
 import subtaskRoutes from './routes/subtaskRoutes.js'
 import userRoutes from "./routes/userRoutes.js";
 import projectMemberRoutes from "./routes/projectMemberRoutes.js";
-import taskAssigneesRoutes from './routes/taskAssigneeRoutes.js'
+import taskAssigneesRoutes from './routes/taskAssigneeRoutes.js';
+import commentRoutes from './routes/commentRoutes.js'
 
 
 dotenv.config();
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'))
 app.use('/project_logos', express.static('project_logos'))
-app.use('task_attachments', express.static('task_attachments'))
+app.use('/task_attachments', express.static('task_attachments'))
 
 
 
@@ -33,6 +34,7 @@ app.use("/api/users", userRoutes);
 app.use('/api/subtasks',subtaskRoutes)
 app.use('/api/projectmembers',projectMemberRoutes)
 app.use('/api/taskmembers',taskAssigneesRoutes)
+app.use('/api/comments',commentRoutes)
 
 app.listen(process.env.PORT, () =>
   console.log(` Server running on port ${process.env.PORT}`)

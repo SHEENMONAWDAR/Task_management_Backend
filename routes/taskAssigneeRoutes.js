@@ -2,7 +2,7 @@ import express from "express";
 import {
   addTaskAssignee,
   getTaskAssignees,
-  removeTaskAssignee,
+  removeTaskAssigneesByTask,
   getUserAssignedTasks,
 } from "../controllers/taskAssigneeController.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
@@ -12,10 +12,10 @@ const router = express.Router();
 
 router.post("/", verifyToken, isAdmin, addTaskAssignee);
 
-router.get("/assignees/:taskId", verifyToken, isAdmin, getTaskAssignees);
+router.get("/:taskId", verifyToken, isAdmin, getTaskAssignees);
 
-router.delete("/assignee/:id", verifyToken, isAdmin, removeTaskAssignee);
+router.delete("/:taskId", verifyToken, isAdmin, removeTaskAssigneesByTask);
 
-router.get("/user-tasks/:userId", verifyToken, isAdmin, getUserAssignedTasks);
+router.get("/:userId", verifyToken, isAdmin, getUserAssignedTasks);
 
 export default router;

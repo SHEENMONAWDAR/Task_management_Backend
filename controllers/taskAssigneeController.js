@@ -28,7 +28,7 @@ export const getTaskAssignees = (req, res) => {
   const { taskId } = req.params;
 
   const sql = `
-    SELECT ta.id, u.name, u.email, u.image
+    SELECT u.id, u.name, u.email, u.image
     FROM st_task_assignees ta
     JOIN st_users u ON ta.user_id = u.id
     WHERE ta.task_id = ?
@@ -45,24 +45,26 @@ export const getTaskAssignees = (req, res) => {
 };
 
 
-export const removeTaskAssignee = (req, res) => {
-  const { id } = req.params; 
+export const removeTaskAssigneesByTask = (req, res) => {
+  const { taskId } = req.params;
 
-  const sql = "DELETE FROM st_task_assignees WHERE id = ?";
+  if (!taskId) {
+    return res.status(400).json({ message: "Task ID is required" });
+  }
 
-  db.query(sql, [id], (err, result) => {
+  const sql = "DELETE FROM st_task_assignees WHERE task_id = ?";
+
+  db.query(sql, [taskId], (err, result) => {
     if (err) {
-      console.error("❌ Error removing assignee:", err);
-      return res.status(500).json({ error: "Database error" });
+      console.error("❌ Error removing assignees:", err);
+      return res.status(500).json({ message: "Database error", error: err.message });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Assignee not found" });
-    }
-
-    res.status(200).json({ message: "🗑️ Assignee removed successfully" });
+    res.status(200).json({ message: `🗑️ ${result.affectedRows} assignee(s) removed successfully` });
   });
 };
+
+
 
 
 export const getUserAssignedTasks = (req, res) => {
