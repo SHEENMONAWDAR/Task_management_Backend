@@ -79,6 +79,7 @@ FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
+LEFT JOIN st_comments c ON c.task_id = t.id 
 GROUP BY t.id;
     `;
 
@@ -98,6 +99,7 @@ SELECT
   p.name AS project_name,
   p.progress AS task_progress,
   t.Attachments AS task_attachments,
+  COUNT(DISTINCT c.id) AS comment_count,
   COALESCE(
     JSON_ARRAYAGG(
       JSON_OBJECT(
@@ -113,6 +115,7 @@ FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
+LEFT JOIN st_comments c ON c.task_id = t.id 
 WHERE t.status = 'todo'
 GROUP BY t.id;
 
@@ -132,7 +135,9 @@ SELECT
   t.*, 
   p.progress AS project_progress,
   p.name AS project_name, 
-    p.progress AS task_progress,
+  p.progress AS task_progress,
+  t.Attachments AS task_attachments,
+  COUNT(DISTINCT c.id) AS comment_count,
     COALESCE(
     JSON_ARRAYAGG(
       JSON_OBJECT(
@@ -148,6 +153,7 @@ FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
+LEFT JOIN st_comments c ON c.task_id = t.id 
 where t.status = 'in-progress'
 GROUP BY t.id;
     `;
@@ -167,6 +173,8 @@ SELECT
   p.progress AS project_progress,
   p.name AS project_name, 
   p.progress AS task_progress,
+  t.Attachments AS task_attachments,
+  COUNT(DISTINCT c.id) AS comment_count,
   COALESCE(
     JSON_ARRAYAGG(
       JSON_OBJECT(
@@ -182,11 +190,141 @@ FROM st_tasks t
 LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
+LEFT JOIN st_comments c ON c.task_id = t.id 
 where t.status = 'done'
 GROUP BY t.id;
     `;
 
     const [results] = await db.promise().query(sql);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("❌ getTasksByStatustodo error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const getMyTasksByStatusdone = async (req, res) => {
+  const { userId } = req.params
+  try {
+    const sql = `
+SELECT 
+    t.*, 
+    p.progress AS project_progress,
+    p.name AS project_name, 
+    p.progress AS task_progress,
+    t.Attachments AS task_attachments,
+    COUNT(DISTINCT c.id) AS comment_count,
+    COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'id', u_all.id,
+                'name', u_all.name,
+                'image', u_all.image
+            )
+        ),
+        JSON_ARRAY()
+    ) AS users,
+    COUNT(t.id) OVER() AS total_tasks
+FROM st_tasks t
+LEFT JOIN st_projects p ON t.project_id = p.id
+LEFT JOIN st_task_assignees au_all ON t.id = au_all.task_id
+LEFT JOIN st_users u_all ON au_all.user_id = u_all.id
+LEFT JOIN st_comments c ON c.task_id = t.id
+INNER JOIN (
+    SELECT DISTINCT task_id
+    FROM st_task_assignees
+    WHERE user_id = ?
+) t_user ON t.id = t_user.task_id
+WHERE t.status = 'done'
+GROUP BY t.id;
+    `;
+
+    const [results] = await db.promise().query(sql, [userId]);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("❌ getTasksByStatustodo error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const getMyTasksByStatusinprogress = async (req, res) => {
+  const { userId } = req.params
+  try {
+    const sql = `
+SELECT 
+    t.*, 
+    p.progress AS project_progress,
+    p.name AS project_name, 
+    p.progress AS task_progress,
+    t.Attachments AS task_attachments,
+    COUNT(DISTINCT c.id) AS comment_count,
+    COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'id', u_all.id,
+                'name', u_all.name,
+                'image', u_all.image
+            )
+        ),
+        JSON_ARRAY()
+    ) AS users,
+    COUNT(t.id) OVER() AS total_tasks
+FROM st_tasks t
+LEFT JOIN st_projects p ON t.project_id = p.id
+LEFT JOIN st_task_assignees au_all ON t.id = au_all.task_id
+LEFT JOIN st_users u_all ON au_all.user_id = u_all.id
+LEFT JOIN st_comments c ON c.task_id = t.id
+INNER JOIN (
+    SELECT DISTINCT task_id
+    FROM st_task_assignees
+    WHERE user_id = ?
+) t_user ON t.id = t_user.task_id
+WHERE t.status = 'in-progress'
+GROUP BY t.id;
+    `;
+
+    const [results] = await db.promise().query(sql, [userId]);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("❌ getTasksByStatustodo error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const getMyTasksByStatustodo = async (req, res) => {
+  const { userId } = req.params
+  try {
+    const sql = `
+SELECT 
+    t.*, 
+    p.progress AS project_progress,
+    p.name AS project_name, 
+    p.progress AS task_progress,
+    t.Attachments AS task_attachments,
+    COUNT(DISTINCT c.id) AS comment_count,
+    COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'id', u_all.id,
+                'name', u_all.name,
+                'image', u_all.image
+            )
+        ),
+        JSON_ARRAY()
+    ) AS users,
+    COUNT(t.id) OVER() AS total_tasks
+FROM st_tasks t
+LEFT JOIN st_projects p ON t.project_id = p.id
+LEFT JOIN st_task_assignees au_all ON t.id = au_all.task_id
+LEFT JOIN st_users u_all ON au_all.user_id = u_all.id
+LEFT JOIN st_comments c ON c.task_id = t.id
+INNER JOIN (
+    SELECT DISTINCT task_id
+    FROM st_task_assignees
+    WHERE user_id = ?
+) t_user ON t.id = t_user.task_id
+WHERE t.status = 'todo'
+GROUP BY t.id;
+    `;
+
+    const [results] = await db.promise().query(sql, [userId]);
     res.status(200).json(results);
   } catch (error) {
     console.error("❌ getTasksByStatustodo error:", error);

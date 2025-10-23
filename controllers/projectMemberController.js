@@ -75,26 +75,20 @@ export const updateProjectMemberRole = (req, res) => {
       return res.status(500).json({ error: "Database error" });
     }
 
-    if (result.affectedRows === 0)
-      return res.status(404).json({ message: "Member not found" });
-
     res.status(200).json({ message: "✅ Member role updated successfully" });
   });
 };
 
 
 export const removeProjectMember = (req, res) => {
-  const { id } = req.params;
+  const { projectId } = req.params;
 
-  const sql = "DELETE FROM st_project_members WHERE id = ?";
-  db.query(sql, [id], (err, result) => {
+  const sql = "DELETE FROM st_project_members WHERE project_id = ?";
+  db.query(sql, [projectId], (err, result) => {
     if (err) {
       console.error("❌ Error removing member:", err);
       return res.status(500).json({ error: "Database error" });
     }
-
-    if (result.affectedRows === 0)
-      return res.status(404).json({ message: "Member not found" });
 
     res.status(200).json({ message: "🗑️ Member removed successfully" });
   });

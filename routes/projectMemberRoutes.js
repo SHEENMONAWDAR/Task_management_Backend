@@ -7,6 +7,6 @@ const router = express.Router();
 router.post("/", verifyToken,addProjectMember);
 router.get("/:id", verifyToken,  getProjectMembers);
 router.put("/:id",verifyToken,  updateProjectMemberRole)
-router.delete("/projectmembers/:id", verifyToken,  removeProjectMember);
+router.delete("/:projectId", verifyToken,  removeProjectMember);
 
 export default router;

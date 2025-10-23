@@ -10,6 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import projectMemberRoutes from "./routes/projectMemberRoutes.js";
 import taskAssigneesRoutes from './routes/taskAssigneeRoutes.js';
 import commentRoutes from './routes/commentRoutes.js'
+import taskStatusRoutes from './routes/taskStatusRoutes.js'
 
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use('/api/subtasks',subtaskRoutes)
 app.use('/api/projectmembers',projectMemberRoutes)
 app.use('/api/taskmembers',taskAssigneesRoutes)
 app.use('/api/comments',commentRoutes)
+app.use('/api',taskStatusRoutes)
 
 app.listen(process.env.PORT, () =>
   console.log(` Server running on port ${process.env.PORT}`)
