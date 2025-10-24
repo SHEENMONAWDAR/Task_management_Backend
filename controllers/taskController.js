@@ -56,9 +56,7 @@ const updateProjectProgress = async (projectId) => {
   }
 };
 
-/**
- * Get all tasks (includes Project_types and Attachments)
- */
+
 export const getAllTasks = async (req, res) => {
   try {
     const { q } = req.query; 
@@ -107,7 +105,7 @@ LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
 LEFT JOIN st_comments c ON c.task_id = t.id 
-WHERE t.status = 'todo'
+WHERE t.status = 'todo' and parent_task_id IS NULL
 GROUP BY t.id;
 
     `;
@@ -145,7 +143,7 @@ LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
 LEFT JOIN st_comments c ON c.task_id = t.id 
-where t.status = 'in-progress'
+where t.status = 'in-progress' and parent_task_id IS NULL
 GROUP BY t.id;
     `;
 
@@ -182,7 +180,7 @@ LEFT JOIN st_projects p ON t.project_id = p.id
 LEFT JOIN st_task_assignees au ON t.id = au.task_id
 LEFT JOIN st_users u ON au.user_id = u.id
 LEFT JOIN st_comments c ON c.task_id = t.id 
-where t.status = 'done'
+where t.status = 'done' and parent_task_id IS NULL
 GROUP BY t.id;
     `;
 
@@ -225,7 +223,7 @@ INNER JOIN (
     FROM st_task_assignees
     WHERE user_id = ?
 ) t_user ON t.id = t_user.task_id
-WHERE t.status = 'done'
+WHERE t.status = 'done' and parent_task_id IS NULL
 GROUP BY t.id;
     `;
 
@@ -268,7 +266,7 @@ INNER JOIN (
     FROM st_task_assignees
     WHERE user_id = ?
 ) t_user ON t.id = t_user.task_id
-WHERE t.status = 'in-progress'
+WHERE t.status = 'in-progress' and parent_task_id IS NULL
 GROUP BY t.id;
     `;
 
@@ -311,7 +309,7 @@ INNER JOIN (
     FROM st_task_assignees
     WHERE user_id = ?
 ) t_user ON t.id = t_user.task_id
-WHERE t.status = 'todo'
+WHERE t.status = 'todo' and parent_task_id IS NULL
 GROUP BY t.id;
     `;
 

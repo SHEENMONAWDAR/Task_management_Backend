@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllProjectswithuserId,createProject,getAllProjects,updateProject,deleteProject,upload,getProjectsWithDetails,
+import { getAllProjectswithuserId,createProject,getAllProjects,updateProject,deleteProject,upload,getProjectsWithDetails
     
 
  } from "../controllers/projectController.js";

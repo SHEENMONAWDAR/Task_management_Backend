@@ -22,7 +22,11 @@ const storage = multer.diskStorage({
 
 export const upload = multer({ storage });
 
-// --- Controller Functions ---
+
+
+
+
+
 
 export const getProjectsWithDetails = (req, res) => {
   const sql = `
@@ -67,7 +71,7 @@ GROUP BY p.id;
 
 
 export const getAllProjectswithuserId = (req, res) => {
-  const {userId} = req.params
+  const { userId } = req.params
   const sql = `
   SELECT
   p.id AS project_id,
@@ -101,7 +105,7 @@ WHERE p.id IN (
 )
 GROUP BY p.id;
   `;
-  db.query(sql,[userId], (err, results) => {
+  db.query(sql, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
@@ -178,9 +182,8 @@ export const createProject = (req, res) => {
 };
 
 export const getAllProjects = async (req, res) => {
-
   try {
-    const { q } = req.query; 
+    const { q } = req.query;
 
     let sql = `SELECT * FROM st_projects`;
     const params = [];
@@ -190,13 +193,15 @@ export const getAllProjects = async (req, res) => {
       const like = `%${q}%`;
       params.push(like);
     }
-
     const [results] = await db.promise().query(sql, params);
+
     res.status(200).json(results);
   } catch (error) {
+    console.error("ERROR:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const updateProject = (req, res) => {
   const { id } = req.params;
