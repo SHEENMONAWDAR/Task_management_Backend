@@ -177,24 +177,25 @@ export const createProject = (req, res) => {
   }
 };
 
-export const getProject = (req, res) => {
-  const { id } = req.params;
+export const getAllProjects = async (req, res) => {
 
-  if (!id) return res.status(400).json({ message: "Project ID is required" });
+  try {
+    const { q } = req.query; 
 
-  const sql = "SELECT * FROM st_projects WHERE id = ?";
-  db.query(sql, [id], (err, results) => {
-    if (err)
-      return res.status(500).json({ message: "Database error", error: err.message });
+    let sql = `SELECT * FROM st_projects`;
+    const params = [];
 
-    if (results.length === 0)
-      return res.status(404).json({ message: "Project not found" });
+    if (q && q.trim() !== "") {
+      sql += ` WHERE name LIKE ?`;
+      const like = `%${q}%`;
+      params.push(like);
+    }
 
-    res.status(200).json({
-      message: "✅ Project fetched successfully",
-      data: results[0],
-    });
-  });
+    const [results] = await db.promise().query(sql, params);
+    res.status(200).json(results);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 export const updateProject = (req, res) => {

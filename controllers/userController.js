@@ -3,14 +3,20 @@ import db from "../db.js";
 
 export const getAllUsers = (req, res) => {
   try {
-    const sql = "SELECT * FROM st_users";
+    const { q } = req.query;
 
-    db.query(sql, (err, results) => {
+    let sql = "SELECT * FROM st_users";
+    const params = [];
+
+    if (q && q.trim() !== "") {
+      sql += ` WHERE name LIKE ?`;
+      const like = `%${q}%`;
+      params.push(like);
+    }
+
+    db.query(sql,params,(err, results) => {
       if (err) return res.status(500).json({ error: err.message });
 
-      if (results.length === 0) {
-        return res.status(404).json({ error: "No users found" });
-      }
       return res.status(200).json(results);
     });
   } catch (error) {

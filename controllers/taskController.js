@@ -61,35 +61,26 @@ const updateProjectProgress = async (projectId) => {
  */
 export const getAllTasks = async (req, res) => {
   try {
-    const sql = `
-SELECT 
-  t.*, 
-  p.name AS project_name, 
-  COALESCE(
-    JSON_ARRAYAGG(
-      JSON_OBJECT(
-        'id', u.id,
-        'name', u.name,
-        'image', u.image
-      )
-    ),
-    JSON_ARRAY()
-  ) AS users
-FROM st_tasks t
-LEFT JOIN st_projects p ON t.project_id = p.id
-LEFT JOIN st_task_assignees au ON t.id = au.task_id
-LEFT JOIN st_users u ON au.user_id = u.id
-LEFT JOIN st_comments c ON c.task_id = t.id 
-GROUP BY t.id;
-    `;
+    const { q } = req.query; 
 
-    const [results] = await db.promise().query(sql);
+    let sql = `SELECT * FROM st_tasks`;
+    const params = [];
+
+    if (q && q.trim() !== "") {
+      sql += ` WHERE title LIKE ?`;
+      const like = `%${q}%`;
+      params.push(like);
+    }
+
+    const [results] = await db.promise().query(sql, params);
     res.status(200).json(results);
   } catch (error) {
-    console.error("❌ getAllTasks error:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
 export const getTasksByStatustodo = async (req, res) => {
   try {
     const sql = `
