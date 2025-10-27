@@ -59,7 +59,7 @@ const updateProjectProgress = async (projectId) => {
 
 export const getAllTasks = async (req, res) => {
   try {
-    const { q } = req.query; 
+    const { q } = req.query;
 
     let sql = `SELECT * FROM st_tasks`;
     const params = [];
@@ -71,6 +71,33 @@ export const getAllTasks = async (req, res) => {
     }
 
     const [results] = await db.promise().query(sql, params);
+    res.status(200).json(results);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+export const getAllTasksByProjectId = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    const sql = `SELECT 
+    t.*,
+    IFNULL(
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id', u.id,
+          'name', u.name,
+          'image', u.image
+        )
+      ), JSON_ARRAY()
+    ) AS users
+FROM st_tasks t
+LEFT JOIN st_task_assignees ts ON t.id = ts.task_id
+LEFT JOIN st_users u ON ts.user_id = u.id
+WHERE t.project_id = ?
+GROUP BY t.id, t.title;`;
+
+    const [results] = await db.promise().query(sql, [projectId]);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ error: error.message });
